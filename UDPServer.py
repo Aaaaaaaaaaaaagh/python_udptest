@@ -21,6 +21,7 @@ NamesInList = [] #So, the list repo and person repo are separate lists, right? T
 while True:
         data, addr = sock.recvfrom(1024) #take 1024 characters, no more no less.
 
+
         sanData = data.decode('utf-8') #decode the byte object that was passed through
         FormattedData = sanData.split(" ") #and split up the words into an array of strings.
         if FormattedData[0] == "register":
@@ -31,10 +32,12 @@ while True:
                                         #print("FAILURE")
                         if flag == 0: #otherwise, add them in in a tuple of 3.
                                 ContactNameRegistry.append([FormattedData[1],FormattedData[2],FormattedData[3]])
-                                print("SUCCESS")
-                                print(ContactNameRegistry)
+                                sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[4])))
+                                #print("SUCCESS")
+                                #print(ContactNameRegistry)
                         else: #flag went up, so post failure.
-                                print("FAILURE")
+                                #print("FAILURE")
+                                sock.sendto(bytes("FAILURE", encoding='utf-8'),("10.120.70.106", int(FormattedData[4])))
         if FormattedData[0] == "create":
                         flag = 0
                         for x in ContactLists:
@@ -42,11 +45,14 @@ while True:
                                         flag = 1 #flag goes up if a duplicate is detected.
                         if flag == 0:
                                 ContactLists.append(FormattedData[1]) #add that list to the list of contactlists.
-                                print("SUCCESS")
+                                sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[2]))) #send it over to the port on the server side.
+                                #print("SUCCESS")
                         else:
-                                print("FAILURE")
+                                #print("FAILURE")
+                                sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[2])))
         if FormattedData[0] == "query-lists":
                         print(ContactLists) #print every list. If there's no list, an empty array is printed.
+                        sock.sendto(bytes(ContactLists, encoding = 'utf-8'),("10.120.70.106", int(FormattedData[1])))
         if FormattedData[0] == "join":
                         flag = 0
                         duplicateflag = 0
@@ -67,11 +73,15 @@ while True:
                                                                         if x[1] == FormattedData[2]: #if a tuple exists already, put a flag up.
                                                                                 print("duplicate goin up!")
                                                                                 duplicateflag = 1
-                        if duplicateflag == 0 and tempflag1 == 1 and tempflag2 == 1: #if we did find matches, but no exact duplicates, add that person into the list.                                        NamesInList.append([FormattedData[1], FormattedData[2]])
+                        if duplicateflag == 0 and tempflag1 == 1 and tempflag2 == 1: #if we did find matches, but no exact duplicates, add that person into the list.
+                                        NamesInList.append([FormattedData[1], FormattedData[2]])
+                                        sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[3])))
                                         print("SUCCESS")
                                         print(NamesInList)
                         else:
+                                        sock.sendto(bytes("FAILURE", encoding='utf-8'),("10.120.70.106", int(FormattedData[3])))
                                         print("FAILURE")
+
         if FormattedData[0] == "save":
                 f = open('%s.txt' % FormattedData[1], 'w') #make a text file with the name we want.
                 f.write("Number of active users: %d\n" % (len(ContactNameRegistry))) #write how many users there are.
@@ -85,12 +95,14 @@ while True:
                         for y in NamesInList:
                                 if y[0] == x:
                                         count += 1
-                        f.write("contact-list %s has %d members.\n" % (x, count)) #and how many members they have, through a loop that increments count for each par$                for x in ContactLists:
+                        f.write("contact-list %s has %d members.\n" % (x, count)) #and how many members they have, through a loop that increments count for each particular list.
+                for x in ContactLists:
                         for y in NamesInList:
                                 if y[0] == x:
                                         for z in ContactNameRegistry:
                                                 if y[1] == z[0]:
-                                                        f.write("list %s contains member: %s, %s, %s\n" % (x, z[0], z[1], z[2])) #sameish loop as above, but prints $                print("SUCCESS")
+                                                        f.write("list %s contains member: %s, %s, %s\n" % (x, z[0], z[1], z[2])) #sameish loop as above, but prints matching values in CN$
+                sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[2])))
 
 #               for x in ContactLists:
 #                       for y in NamesInList:
@@ -114,8 +126,10 @@ while True:
                                 NamesInList.remove(x)
                 if flag == 1:
                         print("SUCCESS") #deleted at least 1 entry.
+                        sock.sendto(bytes("SUCCESS", encoding='utf-8'),("10.120.70.106", int(FormattedData[2])))
                 else:
                         print("FAILURE") #they didn't come up at all.
+                        sock.sendto(bytes("FAILURE", encoding='utf-8'),("10.120.70.106", int(FormattedData[2])))
 
 #       print("%s" % str(len(data)))
 #       print("%s" % sanData)
