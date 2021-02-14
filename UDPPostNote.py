@@ -20,4 +20,4 @@ while True:
         except Exception as e:
                 print (e)
 
-#sock.sendto(MESSAGE,(UDP_IP, UDP_PORT))
+#sock.sendto(MESSAGE,(UDP_IP, UDP_PORT))#sock.sendto(MESSAGE,(UDP_IP, UDP_PORT))
